@@ -1,0 +1,64 @@
+name: CMake
+
+on: [push, pull_request]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Install dependencies
+      run: |
+        sudo apt install -y \
+          ninja-build \
+          libssl-dev \
+          libprotobuf-dev \
+          protobuf-compiler
+  
+    - name: Compile GameNetworkingSockets library
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja ..
+        ninja
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+
+    - name: Install dependencies
+      run: |
+        brew install ninja openssl@1.1 protobuf
+  
+    - name: Compile GameNetworkingSockets library
+      run: |
+        mkdir build
+        cd build
+        cmake -G Ninja -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl@1.1 ..
+        ninja
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+
+    - name: Install msys2
+      uses: numworks/setup-msys2@v1
+      with:
+        path-type: inherit
+
+    - name: Install dependencies
+      run: "msys2do 
+        pacman -S --noconfirm
+          mingw-w64-x86_64-gcc
+          mingw-w64-x86_64-go
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-openssl
+          mingw-w64-x86_64-pkg-config
+          mingw-w64-x86_64-protobuf"
+  
+    - name: Compile GameNetworkingSockets library
+      run: |
+        mkdir build
+        cd build
+        msys2do cmake -G Ninja ..
+        msys2do ninja
